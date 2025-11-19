@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// Tabla de perfil de usuarios
+model Perfiles {
+  id        String   @id @db.Uuid
+  nombre    String?
+  rol       String   @default("cliente")
+  imagen    String   @default("https://kvouupzgdjriuvzynidv.supabase.co/storage/v1/object/sign/project_assets/Users/User_default.png")
+  creado_en DateTime @default(now())
+  telefono  String?
+  recetas   Receta[]
+}
+
+/// Tabla de categorías de productos
+model Categoria {
+  id          Int        @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  createdAt   DateTime   @default(now())
+  productos   Producto[]
+}
+
+/// Tabla de rellenos
+model Relleno {
+  id          Int             @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  createdAt   DateTime        @default(now())
+  detalles    DetallePedido[]
+  productos   Producto[]
+}
+
+/// Tabla de toppings
+model Topping {
+  id          Int             @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  createdAt   DateTime        @default(now())
+  detalles    DetallePedido[]
+  productos   Producto[]
+}
+
+/// Tabla de productos
+model Producto {
+  id          Int             @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  precio      Float
+  toppingId   Int
+  rellenoId   Int
+  categoriaId Int
+  imagen      String          @default("https://kvouupzgdjriuvzynidv.supabase.co/storage/v1/object/sign/project_assets/Pastel_producto.jpg")
+  createdAt   DateTime        @default(now())
+  detalles    DetallePedido[]
+  categoria   Categoria       @relation(fields: [categoriaId], references: [id])
+  relleno     Relleno         @relation(fields: [rellenoId], references: [id])
+  topping     Topping         @relation(fields: [toppingId], references: [id])
+}
+
+/// Tabla de pedidos
+model Pedido {
+  id            Int             @id @default(autoincrement())
+  usuarioId     String          @db.Uuid
+  tipoEntrega   String
+  datosEnvio    Json?
+  estado        String          @default("Pendiente")
+  fechaCreacion DateTime        @default(now())
+  fechaEntrega  DateTime?
+  total         Float
+  createdAt     DateTime        @default(now())
+  detalles      DetallePedido[]
+}
+
+/// Detalle de cada producto dentro de un pedido
+model DetallePedido {
+  id             Int      @id @default(autoincrement())
+  pedidoId       Int
+  productoId     Int
+  toppingId      Int?
+  rellenoId      Int?
+  cantidad       Int      @default(1)
+  precioUnitario Float
+  nombreProducto String
+  imagenProducto String
+  pedido         Pedido   @relation(fields: [pedidoId], references: [id])
+  producto       Producto @relation(fields: [productoId], references: [id])
+  relleno        Relleno? @relation(fields: [rellenoId], references: [id])
+  topping        Topping? @relation(fields: [toppingId], references: [id])
+}
+
+/// Registro de transacciones de Webpay
+model TransaccionWebpay {
+  id        Int      @id @default(autoincrement())
+  buyOrder  String
+  sessionId String
+  monto     Float
+  estado    String   @default("pendiente")
+  payload   Json
+  createdAt DateTime @default(now())
+}
+
+model Receta {
+  id             Int      @id @default(autoincrement())
+  titulo         String
+  descripcion    String?
+  ingredientes   String
+  pasos          String
+  imagenUrl      String?
+  categoria      String
+  autorId        String   @db.Uuid
+  creado_en      DateTime @default(now())
+  actualizado_en DateTime @updatedAt
+  autor          Perfiles @relation(fields: [autorId], references: [id])
+}
