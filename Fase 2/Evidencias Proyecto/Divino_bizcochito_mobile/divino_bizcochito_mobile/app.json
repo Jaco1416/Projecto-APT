@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "divino_bizcochito_mobile",
+    "slug": "divino-bizcochito",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSUserNotificationUsageDescription": "Necesitamos enviarte recordatorios sobre el estado de tus pedidos."
+      }
+    },
+    "android": {
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.divinobizcochito.mobile"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "014dfe65-3188-4e00-878a-da4eeeb3f9a8"
+      }
+    },
+    "owner": "jaco1416"
+  }
+}
