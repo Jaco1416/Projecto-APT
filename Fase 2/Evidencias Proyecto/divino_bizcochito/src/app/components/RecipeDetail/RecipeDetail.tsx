@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAlert } from "@/app/hooks/useAlert";
 
 interface RecipeDetailProps {
   receta: {
@@ -42,6 +43,7 @@ export default function RecipeDetail({
     ingredientes: receta?.ingredientes || "",
     pasos: receta?.pasos || "",
   });
+  const { showAlert } = useAlert();
 
   const canEdit = isAdmin || isOwner;
   const isPublished = receta?.estado === "publicada";
@@ -75,12 +77,23 @@ export default function RecipeDetail({
   };
 
   const handleGuardar = async () => {
+    const { titulo, descripcion, ingredientes, pasos } = editedReceta;
+    if (
+      !titulo.trim() ||
+      !descripcion.trim() ||
+      !ingredientes.trim() ||
+      !pasos.trim()
+    ) {
+      showAlert("Completa todos los campos antes de guardar los cambios.", "warning");
+      return;
+    }
+
     setLoading(true);
     await onGuardar?.(receta.id, {
-      titulo: editedReceta.titulo,
-      descripcion: editedReceta.descripcion,
-      ingredientes: editedReceta.ingredientes,
-      pasos: editedReceta.pasos,
+      titulo,
+      descripcion,
+      ingredientes,
+      pasos,
     });
     setLoading(false);
   };
@@ -143,7 +156,8 @@ export default function RecipeDetail({
                 Descripción
               </label>
               <textarea
-                value={editedReceta.descripcion || "Sin descripción"}
+                value={editedReceta.descripcion}
+                placeholder="Sin descripción"
                 onChange={(e) => setEditedReceta({ ...editedReceta, descripcion: e.target.value })}
                 readOnly={!canEdit}
                 className={`w-full border border-gray-300 rounded-lg px-3 py-2 text-[#530708] focus:outline-none focus:ring-0 focus:border-gray-300 resize-none ${!canEdit ? 'bg-gray-50' : 'bg-white'}`}

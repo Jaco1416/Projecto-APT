@@ -101,11 +101,20 @@ export default function EditarProductoPage() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const target = e.target as HTMLInputElement;
-    const value = target.type === "checkbox" ? target.checked : target.value;
+    const target = e.target;
+    let value: string | number | boolean = target.value;
+
+    if (target instanceof HTMLInputElement) {
+      if (target.type === "number") {
+        value = Number(target.value);
+      } else if (target.type === "checkbox") {
+        value = target.checked;
+      }
+    }
+
     setProducto((prev) => ({
       ...prev,
-      [target.name]: target.type === "number" ? Number(value) : value,
+      [target.name]: value,
     }));
   };
 
@@ -286,7 +295,7 @@ export default function EditarProductoPage() {
                   Topping
                 </label>
                 <select
-                  name="topping_id"
+                  name="toppingId"
                   value={producto.toppingId || ""}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[#530708] focus:ring-2 focus:ring-[#C72C2F]"
@@ -306,7 +315,7 @@ export default function EditarProductoPage() {
                   Relleno
                 </label>
                 <select
-                  name="relleno_id"
+                  name="rellenoId"
                   value={producto.rellenoId || ""}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[#530708] focus:ring-2 focus:ring-[#C72C2F]"
@@ -326,7 +335,7 @@ export default function EditarProductoPage() {
                   Categoría
                 </label>
                 <select
-                  name="categoria_id"
+                  name="categoriaId"
                   value={producto.categoriaId || ""}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[#530708] focus:ring-2 focus:ring-[#C72C2F]"

@@ -12,15 +12,18 @@ const formatTelefono = (value: string) => {
   return `${digits.slice(0, 4)} ${digits.slice(4)}`.trim();
 };
 
+const DEFAULT_IMAGE =
+  "https://kvouupzgdjriuvzynidv.supabase.co/storage/v1/object/public/project_assets/Users/User_default.png";
+
 export default function EditProfile() {
-  const { perfil, user } = useAuth();
+  const { perfil, refreshPerfil } = useAuth();
   const { showAlert } = useAlert();
   const router = useRouter();
 
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
-  const [preview, setPreview] = useState<string>("");
-  const [imagen, setImagen] = useState<string>("");
+  const [preview, setPreview] = useState<string>(DEFAULT_IMAGE);
+  const [imagen, setImagen] = useState<string>(DEFAULT_IMAGE);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -29,8 +32,8 @@ export default function EditProfile() {
       setNombre(perfil.nombre || "");
       const tel = perfil.telefono?.replace("+56 9 ", "") || "";
       setTelefono(formatTelefono(tel));
-      setPreview(perfil.imagen || "");
-      setImagen(perfil.imagen || "");
+      setPreview(perfil.imagen || DEFAULT_IMAGE);
+      setImagen(perfil.imagen || DEFAULT_IMAGE);
     }
   }, [perfil]);
 
@@ -40,6 +43,12 @@ export default function EditProfile() {
     const url = URL.createObjectURL(file);
     setPreview(url);
     setImageFile(file);
+  };
+
+  const handleRemoveImage = () => {
+    setPreview(DEFAULT_IMAGE);
+    setImagen(DEFAULT_IMAGE);
+    setImageFile(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,7 +70,7 @@ export default function EditProfile() {
 
     setSaving(true);
     try {
-      let imageUrl = imagen || perfil.imagen || "";
+      let imageUrl = imagen || perfil.imagen || DEFAULT_IMAGE;
       if (imageFile) {
         const fileExt = imageFile.name.split(".").pop();
         const filePath = `Users/${perfil.id}-${Date.now()}.${fileExt}`;
@@ -101,9 +110,12 @@ export default function EditProfile() {
       if (!res.ok) throw new Error(data.error || "Error al actualizar perfil");
 
       showAlert("Perfil actualizado correctamente.", "success");
-      setTimeout(() => {
-        router.push("/views/perfil");
-      }, 1000);
+      try {
+        await refreshPerfil();
+      } catch (refreshError) {
+        console.error("❌ Error refrescando perfil:", refreshError);
+      }
+      router.push("/views/perfil");
     } catch (error) {
       console.error("❌ Error actualizando perfil:", error);
       showAlert("No se pudo actualizar el perfil.", "error");
@@ -147,6 +159,13 @@ export default function EditProfile() {
               className="hidden"
               onChange={handleImageChange}
             />
+            <button
+              type="button"
+              onClick={handleRemoveImage}
+              className="px-4 py-2 bg-gray-200 text-[#530708] rounded-lg hover:bg-gray-300 transition cursor-pointer"
+            >
+              Quitar foto
+            </button>
           </div>
 
           <div>

@@ -29,6 +29,7 @@ interface AuthContextType {
   loading: boolean;
   handleLogout: () => Promise<void>;
   handlePasswordReset: (password: string) => Promise<PasswordResetResult>;
+  refreshPerfil: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -37,6 +38,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   handleLogout: async () => {},
   handlePasswordReset: async () => ({ success: false }),
+  refreshPerfil: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -60,6 +62,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return null;
     }
     return data;
+  };
+
+  const refreshPerfil = async () => {
+    if (!user?.id) return;
+    const perfilData = await fetchPerfil(user.id);
+    setPerfil(perfilData);
   };
 
   // ---------------------------------------------------------------------
@@ -182,6 +190,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loading,
         handleLogout,
         handlePasswordReset,
+        refreshPerfil,
       }}
     >
       {children}

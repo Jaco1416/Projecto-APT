@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 interface BackButtonProps {
@@ -10,13 +10,43 @@ interface BackButtonProps {
 
 export default function BackButton({ label = "Volver", to }: BackButtonProps) {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const ADMIN_PROFILE = "/views/perfil";
+  const ADMIN_SECTIONS = [
+    "/admin/productos",
+    "/admin/categorias",
+    "/admin/toppings",
+    "/admin/rellenos",
+    "/admin/pedidos",
+    "/admin/usuarios",
+    "/admin/recetas",
+  ];
+
+  const resolveFallbackRoute = () => {
+    if (!pathname) return null;
+    for (const base of ADMIN_SECTIONS) {
+      if (pathname === base) {
+        return ADMIN_PROFILE;
+      }
+      if (pathname.startsWith(`${base}/`)) {
+        return base;
+      }
+    }
+    return null;
+  };
 
   const handleback = () => {
     if (to) {
       router.push(to);
-    } else {
-      router.back();
+      return;
     }
+    const fallbackRoute = resolveFallbackRoute();
+    if (fallbackRoute) {
+      router.push(fallbackRoute);
+      return;
+    }
+    router.back();
   };
 
   return (

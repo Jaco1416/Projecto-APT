@@ -251,7 +251,11 @@ export default function ProductTable({ productos }: ProductTableProps) {
                                         {prod.nombre}
                                     </td>
                                     <td className="px-4 py-2 border border-[#8B3A3A]">
-                                        {prod.descripcion || "-"}
+                                        {prod.descripcion
+                                            ? prod.descripcion.length > 20
+                                                ? `${prod.descripcion.slice(0, 20)}...`
+                                                : prod.descripcion
+                                            : "-"}
                                     </td>
                                     <td className="px-4 py-2 border border-[#8B3A3A]">
                                         {getNombre(categorias, prod.categoriaId)}

@@ -5,6 +5,8 @@ import RecetasCard from '@/app/components/RecetasCard/RecetasCard'
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { FaPlus } from "react-icons/fa";
+import ConfirmModal from "../../components/ui/ConfirmModal";
+import { useAlert } from "@/app/hooks/useAlert";
 
 interface Receta {
     id: string;
@@ -20,11 +22,14 @@ interface Receta {
 
 function RecetasPage() {
     const router = useRouter();
+    const { showAlert } = useAlert();
     const { perfil, user } = useAuth();
     const [recetas, setRecetas] = useState<Receta[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedRecetaId, setSelectedRecetaId] = useState<string | null>(null);
+    const [recipeModalOpen, setRecipeModalOpen] = useState(false);
     const PAGE_SIZE = 12; // 3 filas x 4 columnas
 
     useEffect(() => {
@@ -39,12 +44,12 @@ function RecetasPage() {
             if (!res.ok) throw new Error("Error al obtener recetas");
 
             const data = await res.json();
-            
+
             // Filtrar solo recetas publicadas
-            const recetasPublicadas = Array.isArray(data) 
+            const recetasPublicadas = Array.isArray(data)
                 ? data.filter((receta: any) => receta.estado === "publicada")
                 : [];
-            
+
             setRecetas(recetasPublicadas);
         } catch (err) {
             console.error("❌ Error al traer recetas:", err);
@@ -70,6 +75,39 @@ function RecetasPage() {
         router.push("/views/recetas/agregar");
     };
 
+    const handleEditReceta = (id: string) => {
+        router.push(`/views/recetas/detalle/${id}`);
+    };
+
+    const handleDeleteReceta = (id: string) => {
+        setSelectedRecetaId(id);
+        setRecipeModalOpen(true);
+    };
+    const handleConfirmDeleteReceta = async () => {
+        if (!selectedRecetaId) return;
+
+        try {
+            const res = await fetch(`/api/recetas/${selectedRecetaId}`, {
+                method: "DELETE",
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || "Error al eliminar receta");
+            }
+
+            showAlert("✅ Receta eliminada correctamente", "success");
+            setRecetas((prev) => prev.filter((receta) => receta.id !== selectedRecetaId));
+        } catch (error) {
+            console.error("❌ Error al eliminar receta:", error);
+            showAlert("❌ No se pudo eliminar la receta", "error");
+        } finally {
+            setRecipeModalOpen(false);
+            setSelectedRecetaId(null);
+        }
+    };
+
     if (loading) return <p className="text-center mt-8">Cargando recetas...</p>;
 
     const totalPages = Math.max(1, Math.ceil(recetas.length / PAGE_SIZE));
@@ -82,7 +120,7 @@ function RecetasPage() {
                 Recetas de la comunidad
             </h1>
 
-            
+
             {recetas.length === 0 ? (
                 <p className="text-center text-gray-500">No hay recetas publicadas disponibles</p>
             ) : (
@@ -108,6 +146,8 @@ function RecetasPage() {
                             autor={receta.autor}
                             descripcion={receta.descripcion}
                             imagen={receta.imagenUrl || receta.imagen}
+                            onEdit={() => handleEditReceta(receta.id)}
+                            onDelete={() => handleDeleteReceta(receta.id)}
                             onView={() => handleViewReceta(receta.id)}
                             isAdmin={isAdmin}
                             isOwner={receta.autorId === perfil?.id}
@@ -136,7 +176,7 @@ function RecetasPage() {
                     </button>
                 </div>
             )}
-            
+
             {/* Botón para agregar receta */}
             <div className="flex justify-center mt-8">
                 <button
@@ -147,7 +187,20 @@ function RecetasPage() {
                     <FaPlus size={24} />
                 </button>
             </div>
+            <ConfirmModal
+                isOpen={recipeModalOpen}
+                title="Eliminar receta"
+                message="¿Deseas eliminar esta receta? Esta acción no se puede deshacer."
+                confirmText="Eliminar"
+                cancelText="Cancelar"
+                onConfirm={handleConfirmDeleteReceta}
+                onCancel={() => {
+                    setRecipeModalOpen(false);
+                    setSelectedRecetaId(null);
+                }}
+            />
         </div>
+
     )
 }
 

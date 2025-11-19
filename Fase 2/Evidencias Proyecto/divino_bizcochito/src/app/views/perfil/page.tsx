@@ -9,6 +9,8 @@ import AdminOptions from '@/app/components/AdminOptions/AdminOptions';
 import MisPedidos from '@/app/components/MisPedidos/MisPedidos';
 import MisRecetas from '@/app/components/MisRecetas/MisRecetas';
 
+const DEFAULT_IMAGE = "https://kvouupzgdjriuvzynidv.supabase.co/storage/v1/object/public/project_assets/Users/User_default.png";
+
 function PerfilPage() {
     const { user, perfil, loading } = useAuth();
     const router = useRouter();
@@ -48,7 +50,7 @@ function PerfilPage() {
                         rol={perfil?.rol || "Cliente"}
                         email={user?.email || "juan.perez@example.com"}
                         telefono={perfil?.telefono || "+56 9 1234 5678"}
-                        imagen={perfil?.imagen || "/path/to/image.jpg"}
+                        imagen={perfil?.imagen || DEFAULT_IMAGE}
                         onEditar={() => router.push('/views/perfil/editar')}
                     />
                     {perfil?.rol?.toLowerCase() === "admin" ? (

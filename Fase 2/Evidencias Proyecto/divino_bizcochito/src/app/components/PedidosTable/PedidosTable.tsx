@@ -106,11 +106,11 @@ export default function PedidosTable() {
                                     >
                                         <span
                                             className={`px-3 py-1 rounded-md text-xs font-semibold ${p.estado === "Recibido"
-                                                ? "bg-blue-300 text-blue-100"
-                                                : p.estado === "En producción"
-                                                    ? "bg-yellow-300 text-yellow-100"
+                                                ? "bg-blue-400 text-blue-100"
+                                                : p.estado === "En Producción"
+                                                    ? "bg-yellow-600 text-yellow-100"
                                                     : p.estado === "Listo"
-                                                        ? "bg-purple-300 text-purple-100"
+                                                        ? "bg-purple-500 text-purple-100"
                                                         : p.estado === "Entregado"
                                                             ? "bg-green-600 text-green-100"
                                                             : p.estado === "Cancelado"
